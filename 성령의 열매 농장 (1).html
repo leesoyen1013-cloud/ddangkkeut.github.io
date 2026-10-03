@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>성령의 열매 농장</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#fbf5e0; --card:#fffdf4; --ink:#5b4a35; --ink2:#8b7a62; --line:#eadfba;
+  --leaf:#6cc04a; --leaf-d:#4a9e32; --peach:#ff9a6c; --peach-d:#e07a4c; --sky:#dff4ff;
+  --dot:rgba(120,170,80,.10);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1f2b1d; --card:#2b3a28; --ink:#f4ecd0; --ink2:#c2b78f; --line:#425a3c;
+    --sky:#2a4a5a; --dot:rgba(255,255,255,.04);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1f2b1d; --card:#2b3a28; --ink:#f4ecd0; --ink2:#c2b78f; --line:#425a3c;
+  --sky:#2a4a5a; --dot:rgba(255,255,255,.04);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background-color:var(--bg);
+  background-image:radial-gradient(var(--dot) 2px, transparent 2.5px);
+  background-size:26px 26px;
+  color:var(--ink);
+  font-family:"Jua","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  -webkit-tap-highlight-color:transparent;
+  line-height:1.4;
+}
+button{font:inherit;color:inherit}
+.app{max-width:940px;margin:0 auto;padding:14px 14px 48px}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:8px;background:var(--card);border:3px solid var(--line);border-radius:999px;padding:6px 16px 6px 12px;box-shadow:0 4px 0 var(--line);min-width:0}
+.brand .sprout{font-size:24px}
+.brand input{font:inherit;font-size:22px;color:var(--ink);background:transparent;border:0;border-bottom:2px dashed transparent;outline:0;width:9.5em;max-width:52vw;padding:2px 2px}
+.brand input:focus{border-bottom-color:var(--leaf)}
+.icon-btn{width:48px;height:48px;border-radius:50%;border:3px solid var(--line);background:var(--card);font-size:22px;cursor:pointer;box-shadow:0 4px 0 var(--line)}
+.icon-btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--line)}
+
+.meter{margin:14px 0 12px;background:var(--card);border:3px solid var(--line);border-radius:24px;padding:12px 14px;box-shadow:0 4px 0 var(--line)}
+.slots{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.slot{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:var(--bg);border:2px dashed var(--line);filter:grayscale(1);opacity:.45;transition:all .4s}
+.slot.gap{margin-left:14px}
+.slot.on{filter:none;opacity:1;border:2px solid #fff;background:#fff8d6;box-shadow:0 2px 0 rgba(120,90,40,.2);animation:bob 2.6s ease-in-out infinite}
+.slot.on:nth-child(odd){animation-delay:.4s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.count-line{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;font-size:15px;color:var(--ink2);flex-wrap:wrap}
+.count-line b{color:var(--ink);font-size:17px}
+.bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:8px}
+.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#8ad86a,#ffd45a);border-radius:99px;transition:width .6s}
+
+/* farm */
+.farm{position:relative;width:100%;aspect-ratio:5/4;border-radius:28px;overflow:hidden;border:6px solid #fff;box-shadow:0 8px 0 rgba(90,70,40,.18);background:#9be07c;user-select:none;-webkit-user-select:none}
+.farm canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#layer{position:absolute;inset:0;pointer-events:none}
+.item{position:absolute;transform:translate(-50%,-50%);width:1.25em;height:1.25em;display:grid;place-items:center;line-height:1;pointer-events:auto;touch-action:none;cursor:grab;border-radius:26%;animation:pop .35s ease-out}
+.item::before{content:"";position:absolute;left:14%;right:14%;bottom:6%;height:14%;border-radius:50%;background:rgba(0,0,0,.13);z-index:-1}
+.item .glyph{display:block;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;pointer-events:none}
+.item.sel{outline:3px dashed rgba(255,255,255,.95);background:rgba(255,255,255,.2)}
+.item.drag{cursor:grabbing;filter:brightness(1.05)}
+.item.drag .glyph{transform:translateY(-6%) scale(1.06)}
+@keyframes pop{0%{transform:translate(-50%,-50%) scale(.3)}60%{transform:translate(-50%,-50%) scale(1.15)}100%{transform:translate(-50%,-50%) scale(1)}}
+.hint{position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);background:rgba(255,255,255,.85);color:#5b4a35;border-radius:20px;padding:12px 20px;text-align:center;font-size:17px;pointer-events:none;box-shadow:0 4px 0 rgba(90,70,40,.12)}
+
+.tools{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:14px}
+.tgroup{display:flex;gap:6px}
+.tbtn{width:46px;height:46px;border-radius:16px;border:2px solid var(--line);background:var(--card);font-size:19px;cursor:pointer;box-shadow:0 3px 0 var(--line)}
+.tbtn:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.tbtn:disabled{opacity:.35;cursor:default}
+.btn{border:0;border-radius:999px;padding:11px 20px;background:var(--leaf);color:#fff;font-size:17px;cursor:pointer;box-shadow:0 4px 0 var(--leaf-d);white-space:nowrap}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--leaf-d)}
+.btn.cam{background:var(--peach);box-shadow:0 4px 0 var(--peach-d);padding:12px 24px;font-size:18px}
+.btn.cam:active{box-shadow:0 2px 0 var(--peach-d)}
+.btn.ghost{background:var(--card);color:var(--ink);box-shadow:0 4px 0 var(--line);border:2px solid var(--line)}
+.btn.danger{background:#e8756a;box-shadow:0 4px 0 #c65a50}
+
+/* tabs & panes */
+.tabs{display:flex;gap:8px;margin:22px 0 0}
+.tab{flex:1;border:3px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;background:var(--bg);padding:12px 8px 10px;font-size:17px;cursor:pointer;color:var(--ink2)}
+.tab.on{background:var(--card);color:var(--ink)}
+.pane{background:var(--card);border:3px solid var(--line);border-radius:0 0 24px 24px;padding:14px;box-shadow:0 4px 0 var(--line)}
+.pane[hidden]{display:none}
+
+.tray{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 12px;-webkit-overflow-scrolling:touch}
+.icard{flex:0 0 auto;width:86px;border:2px solid var(--line);border-radius:18px;background:var(--bg);padding:8px 4px 6px;text-align:center;cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none;position:relative;box-shadow:0 3px 0 var(--line)}
+.icard:active:not(.locked){transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.icard .ie{display:block;font-size:38px;line-height:1.2;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.icard .in{display:block;font-size:13px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icard .il{display:block;font-size:11px;color:var(--ink2);min-height:1.3em}
+.icard.locked{cursor:pointer;opacity:.75}
+.icard.locked .ie{filter:grayscale(1) brightness(.85);opacity:.5}
+.icard.locked .il::before{content:"🔒 "}
+.tiny{font-size:13px;color:var(--ink2);margin:6px 2px 0}
+
+/* time cards */
+#times{display:grid;gap:14px}
+.tcard{background:var(--bg);border:2px solid var(--line);border-radius:22px;padding:14px}
+.tcard.done{background:#f3ffe6;border-color:#bfe6a2}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tcard.done{background:#2f4a2b;border-color:#5b8a4c}}
+:root[data-theme="dark"] .tcard.done{background:#2f4a2b;border-color:#5b8a4c}
+.thead{display:flex;gap:12px;align-items:center}
+.tico{width:52px;height:52px;border-radius:16px;background:var(--sky);display:grid;place-items:center;font-size:28px;flex:none}
+.tbadge{display:inline-block;background:var(--leaf);color:#fff;border-radius:99px;padding:1px 10px;font-size:13px}
+.thead h3{margin:2px 0 0;font-size:20px;font-weight:400}
+.tdesc{margin:8px 0 10px;color:var(--ink2);font-size:15px}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.chip{background:var(--card);border:2px dashed var(--line);border-radius:16px;padding:8px 4px;text-align:center;filter:grayscale(1);opacity:.6}
+.chip.on{filter:none;opacity:1;border-style:solid;border-color:#ffe08a;background:#fffbe6;color:#5b4a35}
+.chip .ce{display:block;font-size:30px}
+.chip b{display:block;font-weight:400;font-size:16px}
+.chip small{display:block;font-size:11.5px;line-height:1.3;margin-top:2px;min-height:1.3em}
+.claim{display:flex;gap:8px;margin-top:12px}
+.claim input{flex:1;min-width:0;font:inherit;font-size:17px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:10px 16px;outline:0;text-transform:uppercase}
+.claim input:focus{border-color:var(--leaf)}
+.claim input::placeholder{text-transform:none;color:var(--ink2)}
+.claim input.shake{animation:shake .4s;border-color:#e8756a}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.okline{margin-top:12px;text-align:center;color:#3f8a2a;font-size:16px}
+:root[data-theme="dark"] .okline{color:#a6e08c}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .okline{color:#a6e08c}}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(40,30,15,.5);display:grid;place-items:center;padding:16px;z-index:100}
+.modal[hidden]{display:none}
+.sheet{background:var(--card);border-radius:28px;border:4px solid #fff;box-shadow:0 8px 0 rgba(90,70,40,.25);padding:20px;width:100%;max-width:480px;max-height:88vh;overflow:auto;text-align:center;animation:pop2 .3s ease-out}
+@keyframes pop2{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.sheet h2{margin:0 0 10px;font-weight:400;font-size:24px}
+.sheet .btn{margin-top:14px}
+.sheet .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.grow{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:18px;padding:8px 12px;margin:8px 0;text-align:left;opacity:0;animation:rise .5s forwards}
+@keyframes rise{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+.gf{display:flex;flex-direction:column;align-items:center;min-width:76px}
+.gf span{font-size:34px;line-height:1.1}
+.gf b{font-weight:400;font-size:16px}
+.gf small{font-size:11px;color:var(--ink2)}
+.gu{flex:1;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:28px}
+.gu em{font-style:normal;font-size:11px;background:var(--peach);color:#fff;border-radius:99px;padding:1px 8px;margin-right:2px}
+.shot{width:100%;border-radius:14px;box-shadow:0 4px 0 rgba(90,70,40,.2);display:block;-webkit-touch-callout:default;user-select:auto;-webkit-user-select:auto}
+.sheet .tiny{margin-top:10px}
+.spec{margin:10px 0 0;font-size:17px}
+
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:#5b4a35;color:#fff;padding:11px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:all .25s;z-index:130;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:120}
+#confetti span{position:absolute;top:-8%;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(115vh) rotate(540deg)}}
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:140}
+#flash.go{animation:flash .5s ease-out}
+@keyframes flash{0%{opacity:.95}100%{opacity:0}}
+#count{position:fixed;inset:0;display:none;place-items:center;font-size:min(40vw,220px);color:#fff;text-shadow:0 6px 0 rgba(0,0,0,.25);z-index:135;pointer-events:none;background:rgba(0,0,0,.18)}
+#count.on{display:grid}
+#count span{animation:pop2 .5s ease-out}
+.foot{margin-top:22px;text-align:center;font-size:13px;color:var(--ink2)}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <label class="brand"><span class="sprout">🌱</span><input id="farmName" maxlength="14" value="우리 농장" aria-label="농장 이름"></label>
+    <button class="icon-btn" id="btnSet" aria-label="설정">⚙️</button>
+  </header>
+
+  <section class="meter">
+    <div class="slots" id="slots"></div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="count-line"><span>성령의 열매 <b id="cnt">0</b> / 9</span><span id="nextHint"></span></div>
+  </section>
+
+  <section class="stage">
+    <div class="farm" id="farm">
+      <canvas id="bg"></canvas>
+      <div id="layer"></div>
+      <div class="hint" id="hint">🌱 아래 아이템을 눌러서<br>농장을 꾸며 보세요!</div>
+    </div>
+    <div class="tools">
+      <div class="tgroup">
+        <button class="tbtn" id="tSmall" title="작게" aria-label="작게" disabled>➖</button>
+        <button class="tbtn" id="tBig" title="크게" aria-label="크게" disabled>➕</button>
+        <button class="tbtn" id="tFlip" title="좌우 뒤집기" aria-label="좌우 뒤집기" disabled>↔️</button>
+        <button class="tbtn" id="tDup" title="복사" aria-label="복사" disabled>📑</button>
+        <button class="tbtn" id="tDel" title="삭제" aria-label="삭제" disabled>🗑️</button>
+      </div>
+      <button class="btn cam" id="btnShot">📸 사진 찍기</button>
+    </div>
+  </section>
+
+  <section>
+    <nav class="tabs">
+      <button class="tab on" data-tab="items">🧺 꾸미기 아이템</button>
+      <button class="tab" data-tab="fruits">🍎 열매 받기</button>
+    </nav>
+    <div class="pane" id="pane-items">
+      <div class="tray" id="tray"></div>
+      <p class="tiny">아이템을 누르면 농장에 놓여요. PC에서는 끌어서 원하는 곳에 바로 놓을 수도 있어요. 놓은 뒤에는 끌어서 옮기고, 위의 버튼으로 크기를 바꿔 보세요.</p>
+    </div>
+    <div class="pane" id="pane-fruits" hidden>
+      <div id="times"></div>
+      <p class="tiny">각 타임 활동이 끝나면 리더에게 코드를 받아 입력해 주세요. 열매를 모을수록 새로운 아이템이 열려요!</p>
+    </div>
+  </section>
+
+  <p class="foot">🍎 성령의 열매 · 갈라디아서 5장 22–23절 🍒</p>
+</div>
+
+<div class="modal" id="modal" hidden><div class="sheet" id="sheet"></div></div>
+<div id="toast" role="status"></div>
+<div id="confetti"></div>
+<div id="flash"></div>
+<div id="count"><span id="countNum">3</span></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ===== 설정: 리더가 여기서 코드를 바꿀 수 있어요 ===== */
+const CONFIG = {
+  codes: { 1:'SEED', 2:'SPROUT', 3:'HARVEST' },   // 각 타임 완료 후 참가자에게 알려줄 코드
+  leaderCode: 'LEADER',                            // 아무 타임 칸에나 입력하면 열매 9개가 모두 열려요 (테스트용)
+  storageKey: 'spirit-farm-v1',
+  maxItems: 80
+};
+
+const FRUITS = [
+  {name:'사랑',   e:'🍎', d:'조건 없이 서로를 아끼는 마음'},
+  {name:'희락',   e:'🍊', d:'마음 깊은 곳에서 솟는 기쁨'},
+  {name:'화평',   e:'🍇', d:'다툼 대신 평안을 만드는 마음'},
+  {name:'오래참음',e:'🍐', d:'기다려 주고 끝까지 견디는 힘'},
+  {name:'자비',   e:'🍑', d:'다른 사람의 필요를 살피는 친절'},
+  {name:'양선',   e:'🍋', d:'착한 일을 기꺼이 하는 마음'},
+  {name:'충성',   e:'🍓', d:'맡은 일에 끝까지 신실함'},
+  {name:'온유',   e:'🍈', d:'부드럽고 겸손하게 대하는 마음'},
+  {name:'절제',   e:'🍒', d:'나를 다스리고 균형을 지키는 힘'}
+];
+const TIMES = [
+  {t:1, icon:'🎲', title:'레크레이션 게임', desc:'다 함께 웃고 뛰며 즐기는 레크레이션 게임 시간!'},
+  {t:2, icon:'🗝️', title:'방탈출 + 미니게임 → 보물찾기', desc:'각 게임에서 얻은 힌트를 모아 마지막 보물찾기에 도전해요.'},
+  {t:3, icon:'🏃', title:'런닝맨 + 미니미션', desc:'달리고, 협력하고, 미션을 클리어하는 시간!'}
+];
+
+/* [이모지, 이름, 기본크기, 해금에 필요한 열매 수] */
+const ITEM_DEFS = [
+  ['🌳','나무',1.5,0], ['🌲','소나무',1.5,0], ['🌷','튤립',.8,0], ['🌿','풀',.8,0], ['🍄','버섯',.7,0],
+  ['🐤','병아리',.8,1], ['🧺','바구니',.8,1],
+  ['🌻','해바라기',1.1,2], ['🎈','풍선',1,2],
+  ['🏡','아늑한 집',2.2,3], ['🐔','닭',.9,3],
+  ['🐄','젖소',1.3,4], ['🐶','강아지',.9,4],
+  ['🐑','양',1,5], ['⛲','분수',1.6,5],
+  ['🐴','말',1.4,6], ['🦋','나비',.7,6],
+  ['🌈','무지개',2.8,7], ['🎪','천막',1.8,7],
+  ['🚜','트랙터',1.5,8], ['🎠','회전목마',1.7,8],
+  ['🕊️','평화의 비둘기',1,9], ['👑','열매왕 왕관',1,9], ['🌟','반짝별',.9,9]
+];
+const ITEMS = ITEM_DEFS.map(([e,name,s,n])=>({key:e,e,name,s,n}));
+FRUITS.forEach((f,i)=>ITEMS.push({key:f.e,e:f.e,name:f.name+' 열매',s:.9,fi:i}));
+const CAT = {}; ITEMS.forEach(i=>CAT[i.key]=i);
+
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const EMOJI_FONT='"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+
+/* ===== 상태 ===== */
+function fresh(){return {name:'우리 농장', got:{1:false,2:false,3:false}, items:[], seq:0};}
+function load(){
+  try{
+    const raw=localStorage.getItem(CONFIG.storageKey); if(!raw) return null;
+    const s=JSON.parse(raw); if(!s||typeof s!=='object') return null;
+    const items=(Array.isArray(s.items)?s.items:[]).filter(i=>i&&CAT[i.key]&&isFinite(i.x)&&isFinite(i.y)).map(i=>({id:+i.id,key:i.key,x:clamp(+i.x,.03,.97),y:clamp(+i.y,.05,.98),s:clamp(+i.s||1,.4,4.5),f:!!i.f}));
+    const g=s.got||{};
+    return {name:String(s.name||'우리 농장').slice(0,14), got:{1:!!g[1],2:!!g[2],3:!!g[3]}, items, seq:Math.max(+s.seq||0,...items.map(i=>i.id),0)};
+  }catch(e){return null}
+}
+function save(){ try{ localStorage.setItem(CONFIG.storageKey, JSON.stringify(state)); }catch(e){} }
+let state = load() || fresh();
+const total=()=>(state.got[1]?3:0)+(state.got[2]?3:0)+(state.got[3]?3:0);
+const fruitOwned=i=>!!state.got[Math.floor(i/3)+1];
+const isUnlocked=it=>it.fi!==undefined ? fruitOwned(it.fi) : total()>=it.n;
+const getItem=id=>state.items.find(i=>i.id===id);
+
+/* ===== 배경 장면 그리기 (화면 + 사진 공용) ===== */
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function cloud(c,x,y,r){
+  c.beginPath();
+  c.moveTo(x+r,y);c.arc(x,y,r,0,6.3);
+  c.moveTo(x+r*2,y+r*.2);c.arc(x+r*1.2,y+r*.2,r*.8,0,6.3);
+  c.moveTo(x-r*.5,y+r*.2);c.arc(x-r*1.2,y+r*.2,r*.7,0,6.3);
+  c.moveTo(x+r*2.4,y+r*.5);c.ellipse(x,y+r*.5,r*2.4,r*.55,0,0,6.3);
+  c.fill();
+}
+function drawScene(c,w,h){
+  const R=rng(11), hz=h*.34;
+  let g=c.createLinearGradient(0,0,0,hz+10); g.addColorStop(0,'#8fd6f7'); g.addColorStop(1,'#e6f8ff');
+  c.fillStyle=g; c.fillRect(0,0,w,hz+20);
+  const sx=w*.85, sy=h*.11;
+  g=c.createRadialGradient(sx,sy,0,sx,sy,h*.13); g.addColorStop(0,'rgba(255,244,170,1)'); g.addColorStop(.5,'rgba(255,240,160,.7)'); g.addColorStop(1,'rgba(255,240,160,0)');
+  c.fillStyle=g; c.beginPath(); c.arc(sx,sy,h*.13,0,6.3); c.fill();
+  c.fillStyle='#ffe98a'; c.beginPath(); c.arc(sx,sy,h*.048,0,6.3); c.fill();
+  c.fillStyle='rgba(255,255,255,.94)'; cloud(c,w*.16,h*.09,h*.038); cloud(c,w*.52,h*.16,h*.028); cloud(c,w*.66,h*.055,h*.024);
+  // far hills
+  c.fillStyle='#b9e8a0'; c.beginPath(); c.ellipse(w*.2,hz+h*.04,w*.4,h*.14,0,Math.PI,6.2832); c.fill();
+  c.fillStyle='#a5df88'; c.beginPath(); c.ellipse(w*.78,hz+h*.04,w*.44,h*.11,0,Math.PI,6.2832); c.fill();
+  // ground
+  g=c.createLinearGradient(0,hz,0,h); g.addColorStop(0,'#9ce07b'); g.addColorStop(1,'#6fc85a');
+  c.fillStyle=g; c.fillRect(0,hz,w,h-hz);
+  c.fillStyle='rgba(255,255,255,.05)';
+  for(let y=hz+h*.06,i=0;y<h;y+=h*.1,i++){ if(i%2===0) c.fillRect(0,y,w,h*.05); }
+  // fence
+  const fy=hz+h*.035;
+  c.fillStyle='#c48f4f'; c.fillRect(0,fy-h*.038,w,h*.012); c.fillRect(0,fy-h*.014,w,h*.012);
+  c.fillStyle='#dcae6c';
+  for(let x=w*.02;x<w;x+=w*.055){ c.beginPath(); if(c.roundRect) c.roundRect(x-w*.008,fy-h*.055,w*.016,h*.08,w*.006); else c.rect(x-w*.008,fy-h*.055,w*.016,h*.08); c.fill(); }
+  // pond
+  const px=w*.17, py=h*.76;
+  c.fillStyle='#c6ec9f'; c.beginPath(); c.ellipse(px,py,w*.145,h*.095,0,0,6.3); c.fill();
+  c.fillStyle='#7fd0f0'; c.beginPath(); c.ellipse(px,py,w*.125,h*.078,0,0,6.3); c.fill();
+  c.fillStyle='rgba(255,255,255,.45)'; c.beginPath(); c.ellipse(px-w*.03,py-h*.02,w*.05,h*.016,-.2,0,6.3); c.fill();
+  c.fillStyle='#5fbf5a'; c.beginPath(); c.ellipse(px+w*.05,py+h*.018,w*.022,h*.014,0,0,6.3); c.fill();
+  // path
+  c.lineCap='round'; c.lineJoin='round';
+  c.strokeStyle='#e4cd91'; c.lineWidth=w*.088;
+  c.beginPath(); c.moveTo(w*.56,h*1.04); c.bezierCurveTo(w*.5,h*.82,w*.78,h*.7,w*.6,h*.44); c.stroke();
+  c.strokeStyle='#f2e0b0'; c.lineWidth=w*.072;
+  c.beginPath(); c.moveTo(w*.56,h*1.04); c.bezierCurveTo(w*.5,h*.82,w*.78,h*.7,w*.6,h*.44); c.stroke();
+  // tufts & flowers
+  c.strokeStyle='#58b043'; c.lineWidth=Math.max(1.5,w*.0035);
+  for(let i=0;i<46;i++){
+    const x=R()*w, y=hz+h*.1+R()*(h-hz-h*.12), s=h*.014;
+    c.beginPath(); c.moveTo(x-s,y); c.lineTo(x-s*.5,y-s*1.1); c.moveTo(x,y); c.lineTo(x,y-s*1.5); c.moveTo(x+s,y); c.lineTo(x+s*.5,y-s*1.1); c.stroke();
+  }
+  const cols=['#ffffff','#ffc2d8','#fff08a','#ffd0a0'];
+  for(let i=0;i<26;i++){
+    const x=R()*w, y=hz+h*.1+R()*(h-hz-h*.12), r=h*.0075;
+    c.fillStyle=cols[i%4]; c.beginPath(); c.arc(x,y,r,0,6.3); c.fill();
+    c.fillStyle='#f5a623'; c.beginPath(); c.arc(x,y,r*.4,0,6.3); c.fill();
+  }
+}
+
+/* ===== 농장 렌더링 ===== */
+const farm=$('#farm'), layer=$('#layer'), bg=$('#bg'), bctx=bg.getContext('2d'), hint=$('#hint');
+let selId=null;
+const fsOf=it=>farm.clientWidth*.1*it.s;
+function place(el,it){
+  el.style.left=(it.x*100)+'%'; el.style.top=(it.y*100)+'%';
+  el.style.fontSize=fsOf(it)+'px'; el.style.zIndex=Math.round(it.y*1000);
+  el.firstChild.style.transform=it.f?'scaleX(-1)':'none';
+}
+function makeEl(it){
+  const el=document.createElement('div');
+  el.className='item'+(it.id===selId?' sel':''); el.dataset.id=it.id;
+  const g=document.createElement('span'); g.className='glyph'; g.textContent=CAT[it.key].e;
+  el.appendChild(g); place(el,it); return el;
+}
+function renderLayer(){
+  layer.innerHTML=''; state.items.forEach(it=>layer.appendChild(makeEl(it)));
+  hint.style.display=state.items.length?'none':''; syncTools();
+}
+function resize(){
+  const w=farm.clientWidth,h=farm.clientHeight; if(!w||!h) return;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  bg.width=Math.round(w*dpr); bg.height=Math.round(h*dpr);
+  bctx.setTransform(dpr,0,0,dpr,0,0); drawScene(bctx,w,h);
+  $$('.item',layer).forEach(el=>{const it=getItem(+el.dataset.id); if(it) place(el,it);});
+}
+if('ResizeObserver' in window) new ResizeObserver(resize).observe(farm); else window.addEventListener('resize',resize);
+
+function select(id){
+  selId=id; $$('.item',layer).forEach(el=>el.classList.toggle('sel',+el.dataset.id===id)); syncTools();
+}
+function syncTools(){
+  const on=!!getItem(selId);
+  ['tSmall','tBig','tFlip','tDup','tDel'].forEach(k=>$('#'+k).disabled=!on);
+}
+function addItem(key,x,y){
+  if(state.items.length>=CONFIG.maxItems){toast('아이템이 너무 많아요! 몇 개를 치워 주세요 🧹');return;}
+  const def=CAT[key];
+  const it={id:++state.seq,key,x:clamp(x,.03,.97),y:clamp(y,.05,.98),s:def.s,f:false};
+  state.items.push(it); layer.appendChild(makeEl(it)); hint.style.display='none';
+  select(it.id); save();
+}
+
+/* 아이템 드래그 이동 */
+let drag=null;
+layer.addEventListener('pointerdown',e=>{
+  const el=e.target.closest('.item'); if(!el) return;
+  e.preventDefault();
+  const it=getItem(+el.dataset.id); if(!it) return;
+  select(it.id);
+  const r=farm.getBoundingClientRect();
+  drag={el,it,pid:e.pointerId,ox:it.x*r.width-(e.clientX-r.left),oy:it.y*r.height-(e.clientY-r.top)};
+  try{el.setPointerCapture(e.pointerId)}catch(_){}
+  el.classList.add('drag');
+});
+layer.addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.pid) return;
+  const r=farm.getBoundingClientRect();
+  drag.it.x=clamp((e.clientX-r.left+drag.ox)/r.width,.03,.97);
+  drag.it.y=clamp((e.clientY-r.top+drag.oy)/r.height,.05,.98);
+  place(drag.el,drag.it);
+});
+function endDrag(e){
+  if(!drag||(e&&e.pointerId!==drag.pid)) return;
+  drag.el.classList.remove('drag'); drag=null; save();
+}
+layer.addEventListener('pointerup',endDrag);
+layer.addEventListener('pointercancel',endDrag);
+farm.addEventListener('pointerdown',e=>{ if(!e.target.closest('.item')) select(null); });
+
+/* 도구 버튼 */
+function touchSel(fn){const it=getItem(selId); if(!it) return; fn(it); const el=$(`.item[data-id="${it.id}"]`,layer); if(el) place(el,it); save();}
+$('#tBig').onclick=()=>touchSel(it=>it.s=clamp(it.s*1.15,.4,4.5));
+$('#tSmall').onclick=()=>touchSel(it=>it.s=clamp(it.s/1.15,.4,4.5));
+$('#tFlip').onclick=()=>touchSel(it=>it.f=!it.f);
+$('#tDup').onclick=()=>{
+  const it=getItem(selId); if(!it) return;
+  if(state.items.length>=CONFIG.maxItems){toast('아이템이 너무 많아요! 몇 개를 치워 주세요 🧹');return;}
+  const n={...it,id:++state.seq,x:clamp(it.x+.05,.03,.97),y:clamp(it.y+.05,.05,.98)};
+  state.items.push(n); layer.appendChild(makeEl(n)); select(n.id); save();
+};
+$('#tDel').onclick=()=>{
+  if(!getItem(selId)) return;
+  state.items=state.items.filter(i=>i.id!==selId); selId=null; renderLayer(); save();
+};
+
+/* ===== 아이템 트레이 ===== */
+const tray=$('#tray');
+const rank=it=>it.fi!==undefined?it.fi+.5:it.n;
+function lockLabel(it){return it.fi!==undefined?`${Math.floor(it.fi/3)+1}타임 완료`:`열매 ${it.n}개`;}
+function renderTray(){
+  const list=ITEMS.slice().sort((a,b)=>(isUnlocked(b)-isUnlocked(a))||(rank(a)-rank(b)));
+  tray.innerHTML=list.map(it=>{
+    const un=isUnlocked(it);
+    return `<button class="icard${un?'':' locked'}" data-key="${it.key}"><span class="ie">${it.e}</span><span class="in">${it.name}</span><span class="il">${un?'':lockLabel(it)}</span></button>`;
+  }).join('');
+}
+let tdrag=null, suppressClick=false;
+tray.addEventListener('pointerdown',e=>{
+  const card=e.target.closest('.icard'); if(!card||card.classList.contains('locked')) return;
+  tdrag={key:card.dataset.key,sx:e.clientX,sy:e.clientY,pid:e.pointerId,ghost:null};
+});
+window.addEventListener('pointermove',e=>{
+  if(!tdrag||e.pointerId!==tdrag.pid) return;
+  if(!tdrag.ghost){
+    if(Math.hypot(e.clientX-tdrag.sx,e.clientY-tdrag.sy)<9) return;
+    const g=document.createElement('div');
+    g.textContent=CAT[tdrag.key].e;
+    g.style.cssText=`position:fixed;z-index:110;pointer-events:none;transform:translate(-50%,-50%);line-height:1;font-family:${EMOJI_FONT};font-size:${farm.clientWidth*.1*CAT[tdrag.key].s}px;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))`;
+    document.body.appendChild(g); tdrag.ghost=g;
+  }
+  tdrag.ghost.style.left=e.clientX+'px'; tdrag.ghost.style.top=e.clientY+'px';
+});
+function endTray(e,cancel){
+  if(!tdrag||e.pointerId!==tdrag.pid) return;
+  const t=tdrag; tdrag=null;
+  if(t.ghost){
+    t.ghost.remove(); suppressClick=true; setTimeout(()=>suppressClick=false,60);
+    if(!cancel){
+      const r=farm.getBoundingClientRect();
+      if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){
+        addItem(t.key,(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);
+      }
+    }
+  }
+}
+window.addEventListener('pointerup',e=>endTray(e,false));
+window.addEventListener('pointercancel',e=>endTray(e,true));
+tray.addEventListener('click',e=>{
+  const card=e.target.closest('.icard'); if(!card) return;
+  if(suppressClick){suppressClick=false;return;}
+  const it=CAT[card.dataset.key];
+  if(card.classList.contains('locked')){
+    toast(it.fi!==undefined?`${Math.floor(it.fi/3)+1}타임을 마치면 열려요! 🔒`:`열매를 ${it.n}개 모으면 열려요! 🔒`);
+    return;
+  }
+  addItem(it.key,.5+(Math.random()-.5)*.36,.62+(Math.random()-.5)*.3);
+});
+
+/* ===== 열매 받기 ===== */
+function renderTimes(){
+  $('#times').innerHTML=TIMES.map(T=>{
+    const got=state.got[T.t];
+    const chips=[0,1,2].map(k=>{
+      const f=FRUITS[(T.t-1)*3+k];
+      return `<div class="chip${got?' on':''}"><span class="ce">${f.e}</span><b>${f.name}</b><small>${got?f.d:'🔒'}</small></div>`;
+    }).join('');
+    const bottom=got
+      ? `<div class="okline">✅ 열매 3개를 받았어요!</div>`
+      : `<div class="claim"><input class="code" data-t="${T.t}" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="리더에게 받은 코드" aria-label="${T.t}타임 완료 코드"><button class="btn" data-claim="${T.t}">열매 받기</button></div>`;
+    return `<article class="tcard${got?' done':''}"><div class="thead"><div class="tico">${T.icon}</div><div><span class="tbadge">${T.t}타임</span><h3>${T.title}</h3></div></div><p class="tdesc">${T.desc}</p><div class="chips">${chips}</div>${bottom}</article>`;
+  }).join('');
+}
+$('#times').addEventListener('click',e=>{
+  const b=e.target.closest('[data-claim]'); if(!b) return;
+  claim(+b.dataset.claim);
+});
+$('#times').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.classList.contains('code')) claim(+e.target.dataset.t);
+});
+function claim(t){
+  const input=$(`.code[data-t="${t}"]`); if(!input) return;
+  const v=input.value.trim().toUpperCase(); if(!v) {toast('코드를 입력해 주세요 🙂');return;}
+  if(v===CONFIG.leaderCode.toUpperCase()){
+    const missing=[1,2,3].filter(x=>!state.got[x]); if(!missing.length){toast('이미 열매를 모두 받았어요 🍎');return;}
+    grant(missing);
+  }else if(v===String(CONFIG.codes[t]).toUpperCase()){
+    grant([t]);
+  }else{
+    input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake');
+    toast('코드가 맞지 않아요. 리더에게 다시 확인해 보세요 🙂');
+  }
+}
+function grant(times){
+  const rows=[]; let c=total();
+  times.forEach(t=>{
+    for(let k=0;k<3;k++){
+      const i=(t-1)*3+k; c++;
+      rows.push({f:FRUITS[i],c,unl:ITEMS.filter(it=>it.n===c).concat(ITEMS.filter(it=>it.fi===i))});
+    }
+    state.got[t]=true;
+  });
+  save(); renderAll();
+  const all=total()===9;
+  openModal(
+    `<h2>🎉 열매를 받았어요!</h2>`+
+    rows.map((r,idx)=>`<div class="grow" style="animation-delay:${idx*.35}s"><div class="gf"><span>${r.f.e}</span><b>${r.f.name}</b><small>열매 ${r.c}개째</small></div><div class="gu"><em>NEW</em>${r.unl.map(u=>`<span title="${u.name}">${u.e}</span>`).join('')}</div></div>`).join('')+
+    (all?`<p class="spec">🕊️ 성령의 열매 9가지를 모두 모았어요!<br>이제 멋진 농장을 완성해 보세요.</p>`:'')+
+    `<button class="btn" data-close data-go="items">농장 꾸미러 가기 🌷</button>`
+  );
+  confetti(rows.map(r=>r.f.e).concat(['✨','🎉']));
+}
+
+/* ===== 상단 진행 표시 ===== */
+function renderMeter(){
+  $('#slots').innerHTML=FRUITS.map((f,i)=>`<span class="slot${fruitOwned(i)?' on':''}${i%3===0&&i>0?' gap':''}" title="${f.name}">${f.e}</span>`).join('');
+  const c=total(); $('#cnt').textContent=c; $('#barFill').style.width=(c/9*100)+'%';
+  const ns=ITEMS.filter(i=>i.n>c).map(i=>i.n);
+  if(!ns.length) $('#nextHint').textContent='🎉 모든 아이템이 열렸어요!';
+  else{const n=Math.min(...ns); $('#nextHint').textContent=`열매 ${n}개 → ${ITEMS.filter(i=>i.n===n).map(i=>i.e).join(' ')} 해금`;}
+}
+function renderAll(){ renderMeter(); renderTray(); renderTimes(); }
+
+/* ===== 탭 ===== */
+function setTab(name){
+  $$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===name));
+  $('#pane-items').hidden=name!=='items'; $('#pane-fruits').hidden=name!=='fruits';
+}
+$$('.tab').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+
+/* ===== 모달 / 토스트 / 꽃가루 ===== */
+const modal=$('#modal'), sheet=$('#sheet');
+function openModal(html){sheet.innerHTML=html; modal.hidden=false; sheet.scrollTop=0;}
+function closeModal(){modal.hidden=true; sheet.innerHTML='';}
+modal.addEventListener('click',e=>{
+  const go=e.target.closest('[data-go]');
+  if(e.target===modal||e.target.closest('[data-close]')){ closeModal(); if(go) {setTab(go.dataset.go); farm.scrollIntoView({behavior:'smooth',block:'center'});} }
+});
+let tt; function toast(m){const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),2400);}
+function confetti(list){
+  if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const box=$('#confetti');
+  for(let i=0;i<40;i++){
+    const s=document.createElement('span'); s.textContent=list[i%list.length];
+    s.style.left=(Math.random()*100)+'%'; s.style.fontSize=(18+Math.random()*22)+'px';
+    s.style.animationDuration=(2.4+Math.random()*2)+'s'; s.style.animationDelay=(Math.random()*.8)+'s';
+    box.appendChild(s); setTimeout(()=>s.remove(),5600);
+  }
+}
+
+/* ===== 사진 찍기 ===== */
+let lastCanvas=null;
+async function makePhoto(){
+  try{ await document.fonts.load('40px Jua'); }catch(_){}
+  const ratio=farm.clientHeight/farm.clientWidth||.8;
+  const W=1600,pad=64,fw=W-pad*2,fh=Math.round(fw*ratio),bottom=280,H=pad+fh+bottom;
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const c=cv.getContext('2d');
+  c.fillStyle='#fffaf0'; c.fillRect(0,0,W,H);
+  c.save(); c.translate(pad,pad);
+  c.beginPath(); if(c.roundRect) c.roundRect(0,0,fw,fh,28); else c.rect(0,0,fw,fh); c.clip();
+  drawScene(c,fw,fh);
+  state.items.slice().sort((a,b)=>a.y-b.y).forEach(it=>{
+    const fs=fw*.1*it.s, x=it.x*fw, y=it.y*fh;
+    c.fillStyle='rgba(0,0,0,.13)'; c.beginPath(); c.ellipse(x,y+fs*.4,fs*.38,fs*.085,0,0,6.3); c.fill();
+    c.save(); c.translate(x,y); if(it.f) c.scale(-1,1);
+    c.font=`${fs}px ${EMOJI_FONT}`; c.textAlign='center'; c.textBaseline='middle';
+    c.fillStyle='#000'; c.fillText(CAT[it.key].e,0,0); c.restore();
+  });
+  c.restore();
+  c.textAlign='center'; c.textBaseline='alphabetic';
+  c.fillStyle='#5b4a35'; c.font='68px Jua,"Apple SD Gothic Neo","Malgun Gothic",sans-serif';
+  c.fillText('🌱 '+(state.name||'우리 농장'),W/2,pad+fh+100);
+  const step=92, sx=W/2-step*4;
+  FRUITS.forEach((f,i)=>{
+    const x=sx+i*step, y=pad+fh+175;
+    if(fruitOwned(i)){ c.font=`54px ${EMOJI_FONT}`; c.textBaseline='middle'; c.fillStyle='#000'; c.fillText(f.e,x,y); }
+    else { c.fillStyle='#eadfba'; c.beginPath(); c.arc(x,y,16,0,6.3); c.fill(); }
+  });
+  c.textBaseline='alphabetic'; c.fillStyle='#8b7a62'; c.font='36px Jua,"Apple SD Gothic Neo","Malgun Gothic",sans-serif';
+  const d=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+  c.fillText(`성령의 열매 농장 · ${d}`,W/2,pad+fh+245);
+  lastCanvas=cv; return cv.toDataURL('image/jpeg',.92);
+}
+let shooting=false;
+$('#btnShot').onclick=async()=>{
+  if(shooting) return; shooting=true;
+  select(null);
+  const cnt=$('#count'), num=$('#countNum'); cnt.classList.add('on');
+  for(const n of [3,2,1]){ num.textContent=n; num.style.animation='none'; void num.offsetWidth; num.style.animation=''; await sleep(650); }
+  cnt.classList.remove('on');
+  const fl=$('#flash'); fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
+  let url='';
+  try{ url=await makePhoto(); }catch(err){ toast('사진을 만들지 못했어요. 다시 시도해 주세요'); shooting=false; return; }
+  const canShare=!!(navigator.canShare&&navigator.share);
+  openModal(
+    `<h2>📸 찰칵! 우리 농장</h2><img class="shot" alt="꾸며진 농장 사진" src="${url}">`+
+    `<p class="tiny">사진을 꾹 눌러서 저장하세요! (PC는 우클릭 → 이미지를 다른 이름으로 저장)</p>`+
+    `<div class="row">${canShare?'<button class="btn cam" id="btnShare">공유하기</button>':''}<button class="btn ghost" data-close>닫기</button></div>`
+  );
+  const sb=$('#btnShare');
+  if(sb) sb.onclick=()=>{
+    lastCanvas.toBlob(async blob=>{
+      try{
+        const file=new File([blob],'우리농장.jpg',{type:'image/jpeg'});
+        if(navigator.canShare({files:[file]})) await navigator.share({files:[file],title:state.name||'우리 농장'});
+        else toast('사진을 꾹 눌러서 저장해 주세요 🙂');
+      }catch(err){ if(err&&err.name!=='AbortError') toast('사진을 꾹 눌러서 저장해 주세요 🙂'); }
+    },'image/jpeg',.92);
+  };
+  shooting=false;
+};
+
+/* ===== 설정 ===== */
+$('#btnSet').onclick=()=>{
+  openModal(
+    `<h2>⚙️ 설정</h2>
+     <p class="tiny">이 기기에 저장된 농장 정보를 정리할 수 있어요.</p>
+     <div class="row" style="flex-direction:column;align-items:stretch">
+       <button class="btn ghost" data-act="clear">꾸민 아이템 모두 치우기</button>
+       <button class="btn ghost" data-act="reset">처음부터 다시 시작하기 (열매 포함)</button>
+       <button class="btn" data-close>닫기</button>
+     </div>`
+  );
+};
+sheet.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]'); if(!b) return;
+  if(!b.dataset.armed){ b.dataset.armed='1'; b.classList.add('danger'); b.textContent='정말요? 한 번 더 누르면 지워져요'; return; }
+  if(b.dataset.act==='clear'){ state.items=[]; selId=null; renderLayer(); save(); toast('농장을 깨끗하게 치웠어요 🧹'); }
+  else{ const nm=state.name; state=fresh(); state.name=nm; selId=null; renderAll(); renderLayer(); save(); setTab('fruits'); toast('처음부터 다시 시작해요 🌱'); }
+  closeModal();
+});
+
+/* ===== 농장 이름 ===== */
+const nameInput=$('#farmName'); nameInput.value=state.name;
+nameInput.addEventListener('input',()=>{ state.name=nameInput.value.slice(0,14); save(); });
+
+/* ===== 시작 ===== */
+renderAll(); renderLayer(); resize();
+setTab(total()===0?'fruits':'items');
+})();
+</script>
+</body>
+</html>
